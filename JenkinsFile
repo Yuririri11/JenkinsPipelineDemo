@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     stages {
+
         stage('Hello') {
             steps {
                 echo 'Hello from github hook trigger'
@@ -17,15 +18,13 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying'
-                withCredentials([
-                    [
-                        $class: 'AmazonWebServicesCredentialsBinding',
-                        credentialsId: 'MyAWS',
-                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                    ]
-                ]) {
-                    sh 'aws s3 cp /var/lib/jenkins/workspace/JenkinsPipeline/index.html s3://yuritestjenkins/'
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'MyAWS',
+                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                ]]) {
+                    sh 'aws s3 cp ${WORKSPACE}/index.html s3://yuritestjenkins/'
                 }
             }
         }
@@ -52,15 +51,20 @@ pipeline {
 
         stage('Release') {
             steps {
-                echo 'Releasing' 
-　　　　　　　　　withCredentials([[
+                echo 'Releasing'
+                withCredentials([[
                     $class: 'AmazonWebServicesCredentialsBinding',
                     credentialsId: 'MyAWS',
                     accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]){
-                        sh(script: 'aws s3 cp /var/lib/jenkins/workspace/JenkinsPipeline/index.html s3://prod-jenkins-yuri/')
+                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                ]]) {
+                    sh 'aws s3 cp ${WORKSPACE}/index.html s3://prod-jenkins-yuri/'
                 }
             }
+        }
+
+    }
+}
 
             }
         }
